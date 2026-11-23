@@ -1,0 +1,1124 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Te amo Mila</title>
+  <!-- Fuentes románticas: Great Vibes y Cormorant Garamond -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,600;1,600&family=Great+Vibes&display=swap" rel="stylesheet">
+
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    html, body {
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      background-color: #020204;
+      user-select: none;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    canvas {
+      position: fixed;
+      inset: 0;
+      width: 100vw;
+      height: 100vh;
+      display: block;
+      z-index: 1;
+      cursor: pointer;
+    }
+
+    /* Capa central con el mensaje romántico */
+    .center-message-wrapper {
+      position: fixed;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      z-index: 10;
+      pointer-events: none;
+      padding: 1.5rem;
+      text-align: center;
+    }
+
+    /* Resplandor aterciopelado detrás del texto para mantener contraste perfecto sobre el jardín */
+    .message-aura {
+      position: relative;
+      padding: 2.2rem 3.4rem;
+      border-radius: 9999px;
+      background: radial-gradient(
+        ellipse at center,
+        rgba(3, 2, 5, 0.90) 0%,
+        rgba(3, 2, 5, 0.62) 55%,
+        rgba(2, 2, 4, 0) 100%
+      );
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      opacity: 0;
+      animation: titleAppear 2.6s cubic-bezier(0.22, 1, 0.36, 1) 0.35s forwards;
+    }
+
+    @keyframes titleAppear {
+      0% {
+        opacity: 0;
+        transform: scale(0.92);
+      }
+      100% {
+        opacity: 1;
+        transform: scale(1);
+      }
+    }
+
+    /* Latido suave y orgánico en rojo corazón */
+    @keyframes heartbeatGlow {
+      0%, 100% {
+        transform: scale(1);
+        filter: drop-shadow(0 0 18px rgba(255, 23, 68, 0.78))
+                drop-shadow(0 0 44px rgba(230, 0, 38, 0.48));
+      }
+      14% {
+        transform: scale(1.045);
+        filter: drop-shadow(0 0 28px rgba(255, 23, 68, 0.98))
+                drop-shadow(0 0 62px rgba(230, 0, 38, 0.72));
+      }
+      28% {
+        transform: scale(1.01);
+        filter: drop-shadow(0 0 20px rgba(255, 23, 68, 0.82))
+                drop-shadow(0 0 46px rgba(230, 0, 38, 0.52));
+      }
+      42% {
+        transform: scale(1.032);
+        filter: drop-shadow(0 0 25px rgba(255, 23, 68, 0.92))
+                drop-shadow(0 0 56px rgba(230, 0, 38, 0.62));
+      }
+      70% {
+        transform: scale(1);
+      }
+    }
+
+    .love-title {
+      font-family: 'Great Vibes', 'Cormorant Garamond', cursive, serif;
+      font-size: clamp(3.6rem, 10vw, 7.4rem);
+      font-weight: 400;
+      line-height: 1.12;
+      letter-spacing: 0.02em;
+      background: linear-gradient(180deg, #ff5e7e 0%, #ff1744 48%, #e60026 100%);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+      animation: heartbeatGlow 3.2s infinite ease-in-out;
+    }
+
+    .heart-ornament {
+      margin-top: 0.35rem;
+      width: clamp(26px, 4vw, 38px);
+      height: clamp(26px, 4vw, 38px);
+      animation: heartbeatGlow 3.2s infinite ease-in-out;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Lienzo del suelo negro nocturno donde brotan las flores desde 0 -->
+  <canvas id="gardenCanvas"></canvas>
+
+  <!-- Mensaje central en rojo corazón -->
+  <div class="center-message-wrapper">
+    <div class="message-aura">
+      <h1 class="love-title">Te amo Mila</h1>
+      <svg class="heart-ornament" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <defs>
+          <linearGradient id="heartRedGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+            <stop offset="0%" stop-color="#ff6b88" />
+            <stop offset="50%" stop-color="#ff1744" />
+            <stop offset="100%" stop-color="#e60026" />
+          </linearGradient>
+        </defs>
+        <path d="M16 28.5C16 28.5 3.5 20.2 3.5 11.2C3.5 7.1 6.7 4 10.6 4C13.1 4 15.1 5.3 16 7.1C16.9 5.3 18.9 4 21.4 4C25.3 4 28.5 7.1 28.5 11.2C28.5 20.2 16 28.5 16 28.5Z" fill="url(#heartRedGrad)" />
+      </svg>
+    </div>
+  </div>
+
+  <script>
+    window.onload = function () {
+      const canvas = document.getElementById('gardenCanvas');
+      const ctx = canvas.getContext('2d');
+
+      let width = 0;
+      let height = 0;
+      let dpr = Math.min(window.devicePixelRatio || 1, 2);
+
+      // Colecciones de elementos vivos en el suelo oscuro
+      let flowers = [];
+      let fireflies = [];
+      let pollenParticles = [];
+      let fallingSeeds = [];
+      let soilSparkles = [];
+
+      // Especies botánicas del jardín nocturno
+      const FLOWER_TYPES = [
+        'rose',
+        'white_tulip',
+        'orange_tulip',
+        'lavender',
+        'bellflower',
+        'daisy',
+        'gypsophila'
+      ];
+
+      function resize() {
+        width = window.innerWidth;
+        height = window.innerHeight;
+        dpr = Math.min(window.devicePixelRatio || 1, 2);
+
+        canvas.width = Math.floor(width * dpr);
+        canvas.height = Math.floor(height * dpr);
+        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+
+        if (flowers.length === 0) {
+          initGardenFromZero();
+        }
+      }
+
+      // ==========================================================
+      // UTILIDADES DE CURVAS DE BÉZIER E INTERPOLACIÓN ORGÁNICA
+      // ==========================================================
+      function quadBezierPoint(p0, p1, p2, t) {
+        const inv = 1 - t;
+        return {
+          x: inv * inv * p0.x + 2 * inv * t * p1.x + t * t * p2.x,
+          y: inv * inv * p0.y + 2 * inv * t * p1.y + t * t * p2.y
+        };
+      }
+
+      function quadBezierTangent(p0, p1, p2, t) {
+        const dx = 2 * (1 - t) * (p1.x - p0.x) + 2 * t * (p2.x - p1.x);
+        const dy = 2 * (1 - t) * (p1.y - p0.y) + 2 * t * (p2.y - p1.y);
+        return Math.atan2(dy, dx);
+      }
+
+      function easeOutCubic(x) {
+        return 1 - Math.pow(1 - x, 3);
+      }
+
+      function easeOutBack(x) {
+        const c1 = 1.65;
+        const c3 = c1 + 1;
+        return 1 + c3 * Math.pow(x - 1, 3) + c1 * Math.pow(x - 1, 2);
+      }
+
+      // ==========================================================
+      // CREACIÓN DE FLORES QUE NACEN LITERALMENTE DESDE 0% DEL SUELO
+      // ==========================================================
+      function createFlower(options = {}) {
+        const type = options.type || FLOWER_TYPES[Math.floor(Math.random() * FLOWER_TYPES.length)];
+        const isInteractive = Boolean(options.isInteractive);
+
+        const cx = width * 0.5;
+        const cy = height * 0.5;
+        // Zona protegida más compacta alrededor de "Te amo Mila" para dejar pasar el manto de mini florecitas cerca
+        const safeRx = Math.min(width * 0.31, 265);
+        const safeRy = Math.min(height * 0.16, 108);
+
+        // Profundidad de perspectiva: cercanía media equilibrada con flores ligeramente más chicas respecto al tallo
+        const depth = options.depth !== undefined ? options.depth : Math.pow(Math.random(), 0.9);
+        const miniScale = options.scale || (0.38 + depth * 0.30);
+
+        let startX, startY, endX, endY;
+
+        if (isInteractive && options.targetX !== undefined && options.targetY !== undefined) {
+          // El punto tocado germina como semilla en el suelo oscuro
+          startX = options.targetX;
+          startY = options.targetY;
+          const stemLen = (24 + Math.random() * 16) * (miniScale / 0.50);
+          const lean = (Math.random() - 0.5) * 14;
+          endX = Math.max(16, Math.min(width - 16, startX + lean));
+          endY = Math.max(22, startY - stemLen);
+        } else {
+          // Distribuir semillas por toda la pradera nocturna oscura
+          startX = width * (0.03 + Math.random() * 0.94);
+          startY = height * (0.08 + Math.random() * 0.91);
+
+          // Tallo más pequeño y delicado
+          const stemHeight = (18 + depth * 24) * (0.85 + Math.random() * 0.28);
+          endX = startX + (Math.random() - 0.5) * (12 + depth * 16);
+          endY = startY - stemHeight;
+
+          // Evitar que las flores cubran directamente las letras de "Te amo Mila"
+          const normDx = (endX - cx) / safeRx;
+          const normDy = (endY - cy) / safeRy;
+          if (normDx * normDx + normDy * normDy < 1.0) {
+            if (endY >= cy) {
+              endY = cy + safeRy + 12 + Math.random() * 24;
+              startY = endY + stemHeight;
+            } else {
+              endY = cy - safeRy - 12 - Math.random() * 24;
+              startY = endY + stemHeight;
+            }
+          }
+        }
+
+        // Curvatura delicada del tallito corto
+        const midX = (startX + endX) * 0.5;
+        const midY = (startY + endY) * 0.5;
+        const archDir = (endX < cx) ? 1 : -1;
+        const curveStrength = (4 + Math.random() * 12) * (Math.random() < 0.7 ? archDir : -archDir);
+        const ctrlX = midX + curveStrength;
+        const ctrlY = midY - Math.abs(curveStrength) * 0.18;
+
+        // Hojitas diminutas en el tallo
+        const leaves = [];
+        const leafCount = (type === 'lavender' || type === 'gypsophila') ? 1 : 2;
+        for (let i = 0; i < leafCount; i++) {
+          const t = 0.28 + i * 0.32 + (Math.random() - 0.5) * 0.06;
+          leaves.push({
+            t: Math.max(0.2, Math.min(0.75, t)),
+            side: i % 2 === 0 ? 1 : -1,
+            size: (0.75 + Math.random() * 0.35) * miniScale,
+            angleOffset: (Math.random() - 0.5) * 0.2
+          });
+        }
+
+        // Espinas diminutas para las mini rosas
+        const thorns = [];
+        if (type === 'rose') {
+          for (let i = 0; i < 2; i++) {
+            thorns.push({
+              t: 0.32 + i * 0.28,
+              side: i % 2 === 0 ? -1 : 1
+            });
+          }
+        }
+
+        // Estructuras secundarias en miniatura según especie
+        const subBlooms = [];
+        if (type === 'gypsophila') {
+          for (let i = 0; i < 11; i++) {
+            const angle = Math.random() * Math.PI * 2;
+            const dist = 4 + Math.random() * 22;
+            subBlooms.push({
+              dx: Math.cos(angle) * dist,
+              dy: Math.sin(angle) * dist - 5,
+              r: 1.9 + Math.random() * 1.8,
+              delay: Math.random() * 0.35
+            });
+          }
+        } else if (type === 'lavender') {
+          const tiers = 8;
+          for (let i = 0; i < tiers; i++) {
+            const frac = i / tiers;
+            subBlooms.push({
+              frac,
+              spread: (1 - frac * 0.55) * 8.0,
+              size: (1 - frac * 0.35) * 4.6
+            });
+          }
+        } else if (type === 'bellflower') {
+          const bells = 3;
+          for (let i = 0; i < bells; i++) {
+            subBlooms.push({
+              tOffset: 0.72 + i * 0.12,
+              side: i % 2 === 0 ? 1 : -1,
+              branchLen: 12 + i * 3,
+              scale: 0.85 + (i % 2) * 0.15,
+              hue: 242 + Math.random() * 28
+            });
+          }
+        }
+
+        return {
+          type,
+          depth,
+          startX,
+          startY,
+          ctrlX,
+          ctrlY,
+          endX,
+          endY,
+          scale: miniScale,
+          // TODAS las mini florecitas nacen desde 0%
+          seedGlow: 0,
+          stemProgress: 0,
+          bloomProgress: 0,
+          growSpeed: isInteractive ? (0.72 + Math.random() * 0.22) : (0.28 + Math.random() * 0.22),
+          bloomSpeed: isInteractive ? (0.82 + Math.random() * 0.25) : (0.34 + Math.random() * 0.24),
+          delay: options.delay || 0,
+          swayPhase: Math.random() * Math.PI * 2,
+          swaySpeed: 0.9 + Math.random() * 0.7,
+          swayAmount: (1.4 + depth * 2.8),
+          roseVariant: Math.random() < 0.65 ? 'crimson' : 'velvet_red',
+          leaves,
+          thorns,
+          subBlooms,
+          age: 0,
+          maxLife: isInteractive ? 9999 : (36 + Math.random() * 28),
+          // Las mini flores más lejanas tienen una suavidad atmosférica sutil
+          opacity: 0.62 + depth * 0.38
+        };
+      }
+
+      function initGardenFromZero() {
+        flowers = [];
+        // Cantidad equilibrada para que se distingan bien las flores sin saturar ni verse diminutas
+        const totalFlowers = Math.min(145, Math.max(105, Math.floor((width * height) / 8200)));
+
+        for (let i = 0; i < totalFlowers; i++) {
+          const guaranteedType = FLOWER_TYPES[i % FLOWER_TYPES.length];
+          const waveDelay = 0.2 + (i / totalFlowers) * 7.5 + Math.random() * 0.45;
+          flowers.push(createFlower({
+            type: guaranteedType,
+            delay: waveDelay
+          }));
+        }
+
+        // Ordenar por profundidad para que las más lejanas queden detrás de las medias
+        flowers.sort((a, b) => a.depth - b.depth);
+
+        // Semillas/destellos diminutos latentes en el suelo negro oscuro
+        soilSparkles = [];
+        const sparkleCount = Math.min(110, Math.floor((width * height) / 11000));
+        for (let i = 0; i < sparkleCount; i++) {
+          soilSparkles.push({
+            x: Math.random() * width,
+            y: height * (0.05 + Math.random() * 0.94),
+            r: 0.45 + Math.random() * 0.95,
+            phase: Math.random() * Math.PI * 2,
+            speed: 0.8 + Math.random() * 1.6,
+            isGold: Math.random() < 0.68
+          });
+        }
+
+        // Luciérnagas diminutas flotando sobre la pradera nocturna
+        fireflies = [];
+        const fireflyCount = Math.min(48, Math.floor(width / 26));
+        for (let i = 0; i < fireflyCount; i++) {
+          fireflies.push({
+            x: Math.random() * width,
+            y: Math.random() * height,
+            vx: (Math.random() - 0.5) * 12,
+            vy: (Math.random() - 0.5) * 9,
+            radius: 0.9 + Math.random() * 1.2,
+            phase: Math.random() * Math.PI * 2,
+            pulseSpeed: 1.3 + Math.random() * 2.1,
+            isWarmGold: Math.random() < 0.82
+          });
+        }
+
+        // Partículas diminutas de polen luminoso ascendente
+        pollenParticles = [];
+        for (let i = 0; i < 36; i++) {
+          pollenParticles.push(createPollenParticle(true));
+        }
+      }
+
+      function createPollenParticle(randomY = false) {
+        return {
+          x: Math.random() * width,
+          y: randomY ? Math.random() * height : height + 10,
+          vy: -(6 + Math.random() * 10),
+          vx: (Math.random() - 0.5) * 8,
+          size: 0.65 + Math.random() * 1.1,
+          alpha: 0.22 + Math.random() * 0.48,
+          phase: Math.random() * Math.PI * 2
+        };
+      }
+
+      // ==========================================================
+      // INTERACCIÓN: CAE UNA CHISPA DORADA Y NACE UNA MINI FLOR DESDE 0
+      // ==========================================================
+      function handlePointerPlant(clientX, clientY) {
+        const mainSpecies = ['rose', 'white_tulip', 'orange_tulip', 'lavender', 'bellflower', 'daisy'];
+        const chosenType = mainSpecies[Math.floor(Math.random() * mainSpecies.length)];
+
+        // Chispa dorada diminuta que cae hasta el suelo negro y germina
+        fallingSeeds.push({
+          x: clientX + (Math.random() - 0.5) * 12,
+          y: Math.max(0, clientY - 55),
+          targetX: clientX,
+          targetY: clientY,
+          vy: 135,
+          flowerType: chosenType,
+          trail: []
+        });
+      }
+
+      canvas.addEventListener('click', (e) => {
+        handlePointerPlant(e.clientX, e.clientY);
+      });
+
+      canvas.addEventListener('touchstart', (e) => {
+        if (e.touches && e.touches.length > 0) {
+          const t = e.touches[0];
+          handlePointerPlant(t.clientX, t.clientY);
+        }
+      }, { passive: true });
+
+      // ==========================================================
+      // BUCLE PRINCIPAL DE ANIMACIÓN
+      // ==========================================================
+      let lastTime = performance.now();
+
+      function animate(now) {
+        const dt = Math.min((now - lastTime) / 1000, 0.05);
+        lastTime = now;
+        const time = now / 1000;
+
+        // 1. Fondo negro nocturno profundo (suelo oscuro de donde brotan las flores)
+        const soilGrad = ctx.createRadialGradient(
+          width * 0.5, height * 0.48, 25,
+          width * 0.5, height * 0.52, Math.max(width, height) * 0.88
+        );
+        soilGrad.addColorStop(0.0, '#0a0910');
+        soilGrad.addColorStop(0.55, '#040407');
+        soilGrad.addColorStop(1.0, '#010102');
+
+        ctx.fillStyle = soilGrad;
+        ctx.fillRect(0, 0, width, height);
+
+        // 2. Pequeñas semillas y destellos de luz latentes en el fondo negro
+        for (const sp of soilSparkles) {
+          const pulse = 0.25 + 0.75 * Math.pow((Math.sin(time * sp.speed + sp.phase) + 1) * 0.5, 1.8);
+          ctx.fillStyle = sp.isGold
+            ? `rgba(255, 224, 130, ${0.42 * pulse})`
+            : `rgba(110, 231, 183, ${0.32 * pulse})`;
+          ctx.beginPath();
+          ctx.arc(sp.x, sp.y, sp.r * (0.8 + pulse * 0.4), 0, Math.PI * 2);
+          ctx.fill();
+        }
+
+        // 3. Actualizar y dibujar las flores brotando desde 0%
+        for (let i = flowers.length - 1; i >= 0; i--) {
+          const f = flowers[i];
+          if (f.delay > 0) {
+            f.delay -= dt;
+            continue;
+          }
+
+          f.age += dt;
+          if (f.seedGlow < 1) {
+            f.seedGlow = Math.min(1, f.seedGlow + dt * 2.2);
+          }
+
+          if (f.stemProgress < 1) {
+            f.stemProgress = Math.min(1, f.stemProgress + f.growSpeed * dt);
+          } else if (f.bloomProgress < 1) {
+            f.bloomProgress = Math.min(1, f.bloomProgress + f.bloomSpeed * dt);
+          }
+
+          // Renovación orgánica: cuando una mini flor cumple su ciclo, otra nueva brota desde 0
+          if (f.age > f.maxLife) {
+            f.opacity -= dt * 0.25;
+            if (f.opacity <= 0) {
+              flowers[i] = createFlower({ delay: Math.random() * 1.5, depth: f.depth });
+              continue;
+            }
+          }
+
+          drawSingleFlower(f, time);
+        }
+
+        // 4. Chispas/semillas doradas cayendo al hacer clic o tocar el suelo negro
+        for (let i = fallingSeeds.length - 1; i >= 0; i--) {
+          const s = fallingSeeds[i];
+          s.trail.push({ x: s.x, y: s.y });
+          if (s.trail.length > 8) s.trail.shift();
+
+          const dx = s.targetX - s.x;
+          s.x += dx * Math.min(1, dt * 6);
+          s.y += s.vy * dt;
+
+          // Dibujar estela dorada delicada
+          for (let j = 0; j < s.trail.length; j++) {
+            const tr = s.trail[j];
+            const frac = (j + 1) / s.trail.length;
+            ctx.fillStyle = `rgba(255, 224, 120, ${frac * 0.6})`;
+            ctx.beginPath();
+            ctx.arc(tr.x, tr.y, 1.5 * frac, 0, Math.PI * 2);
+            ctx.fill();
+          }
+
+          // Cabeza diminuta de la chispa
+          ctx.fillStyle = '#fffbeb';
+          ctx.beginPath();
+          ctx.arc(s.x, s.y, 2.0, 0, Math.PI * 2);
+          ctx.fill();
+
+          if (s.y >= s.targetY) {
+            const newFlower = createFlower({
+              type: s.flowerType,
+              targetX: s.targetX,
+              targetY: s.targetY,
+              isInteractive: true,
+              depth: 0.85,
+              scale: 0.42 + Math.random() * 0.14
+            });
+            flowers.push(newFlower);
+            flowers.sort((a, b) => a.depth - b.depth);
+            if (flowers.length > 175) flowers.shift();
+            fallingSeeds.splice(i, 1);
+          }
+        }
+
+        // 5. Polen luminoso y luciérnagas doradas flotando sobre el jardín
+        ctx.save();
+        ctx.globalCompositeOperation = 'screen';
+
+        for (let i = 0; i < pollenParticles.length; i++) {
+          const p = pollenParticles[i];
+          p.y += p.vy * dt;
+          p.x += (p.vx + Math.sin(time * 1.1 + p.phase) * 9) * dt;
+          if (p.y < -15) {
+            pollenParticles[i] = createPollenParticle(false);
+            continue;
+          }
+          ctx.fillStyle = `rgba(255, 232, 165, ${p.alpha})`;
+          ctx.beginPath();
+          ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+          ctx.fill();
+        }
+
+        for (const ff of fireflies) {
+          ff.x += (ff.vx + Math.sin(time * 0.8 + ff.phase) * 11) * dt;
+          ff.y += (ff.vy + Math.cos(time * 0.7 + ff.phase) * 9) * dt;
+
+          if (ff.x < -20) ff.x = width + 20;
+          if (ff.x > width + 20) ff.x = -20;
+          if (ff.y < -20) ff.y = height + 20;
+          if (ff.y > height + 20) ff.y = -20;
+
+          const glow = 0.25 + 0.75 * Math.pow((Math.sin(time * ff.pulseSpeed + ff.phase) + 1) * 0.5, 1.6);
+          const r = ff.radius * (3.2 + glow * 2.5);
+          const grad = ctx.createRadialGradient(ff.x, ff.y, 0, ff.x, ff.y, r);
+
+          if (ff.isWarmGold) {
+            grad.addColorStop(0, `rgba(255, 246, 195, ${glow})`);
+            grad.addColorStop(0.4, `rgba(255, 196, 75, ${glow * 0.45})`);
+            grad.addColorStop(1, 'rgba(255, 180, 50, 0)');
+          } else {
+            grad.addColorStop(0, `rgba(255, 180, 200, ${glow})`);
+            grad.addColorStop(0.4, `rgba(255, 23, 68, ${glow * 0.4})`);
+            grad.addColorStop(1, 'rgba(255, 23, 68, 0)');
+          }
+
+          ctx.fillStyle = grad;
+          ctx.beginPath();
+          ctx.arc(ff.x, ff.y, r, 0, Math.PI * 2);
+          ctx.fill();
+        }
+
+        ctx.restore();
+
+        requestAnimationFrame(animate);
+      }
+
+      // ==========================================================
+      // DIBUJO DE CADA FLOR DESDE SU BROTE Y TALLO HASTA FLORECER
+      // ==========================================================
+      function drawSingleFlower(f, time) {
+        try {
+          ctx.save();
+          ctx.globalAlpha = Math.max(0, Math.min(1, f.opacity));
+
+          const sway = Math.sin(time * f.swaySpeed + f.swayPhase) * f.swayAmount;
+          const p0 = { x: f.startX, y: f.startY };
+          const p1 = { x: f.ctrlX + sway * 0.45, y: f.ctrlY };
+          const p2 = { x: f.endX + sway, y: f.endY };
+
+          // 1. Semilla / brote luminoso al nivel del suelo oscuro (0% -> 100%)
+          const seedAlpha = f.seedGlow * (1 - easeOutCubic(f.stemProgress) * 0.55);
+          if (seedAlpha > 0.02) {
+            const glowR = (7 + Math.sin(time * 3 + f.swayPhase) * 2) * (0.55 + f.scale);
+            const seedGrad = ctx.createRadialGradient(p0.x, p0.y, 0, p0.x, p0.y, glowR);
+            seedGrad.addColorStop(0, `rgba(255, 244, 178, ${seedAlpha * 0.85})`);
+            seedGrad.addColorStop(0.5, `rgba(110, 231, 183, ${seedAlpha * 0.35})`);
+            seedGrad.addColorStop(1, 'rgba(110, 231, 183, 0)');
+            ctx.fillStyle = seedGrad;
+            ctx.beginPath();
+            ctx.arc(p0.x, p0.y, glowR, 0, Math.PI * 2);
+            ctx.fill();
+          }
+
+          // Par de cotiledones diminutos al empezar a brotar del suelo
+          const sproutFrac = Math.min(1, f.stemProgress / 0.35);
+          if (sproutFrac > 0) {
+            const cotScale = easeOutBack(sproutFrac) * Math.max(0.45, f.scale * 0.9);
+            for (const dir of [-1, 1]) {
+              ctx.save();
+              ctx.translate(p0.x, p0.y);
+              ctx.rotate(dir * 0.65);
+              ctx.scale(cotScale, cotScale);
+              ctx.fillStyle = '#34d399';
+              ctx.beginPath();
+              ctx.ellipse(0, -4.5, 2.4, 5.2, 0, 0, Math.PI * 2);
+              ctx.fill();
+              ctx.restore();
+            }
+          }
+
+          // 2. Crecimiento progresivo del tallo desde 0% hasta 100%
+          const stemEase = easeOutCubic(f.stemProgress);
+          if (stemEase > 0.01) {
+            const steps = Math.max(4, Math.floor(stemEase * 24));
+            const stemWidth = Math.max(1.1, (1.6 + f.depth * 1.4) * (0.65 + f.scale * 0.5));
+
+            const stemGrad = ctx.createLinearGradient(p0.x, p0.y, p2.x, p2.y);
+            stemGrad.addColorStop(0, '#065f46');
+            stemGrad.addColorStop(0.6, '#10b981');
+            stemGrad.addColorStop(1, '#6ee7b7');
+
+            ctx.strokeStyle = stemGrad;
+            ctx.lineWidth = stemWidth;
+            ctx.lineCap = 'round';
+            ctx.beginPath();
+            for (let i = 0; i <= steps; i++) {
+              const t = (i / steps) * stemEase;
+              const pt = quadBezierPoint(p0, p1, p2, t);
+              if (i === 0) ctx.moveTo(pt.x, pt.y);
+              else ctx.lineTo(pt.x, pt.y);
+            }
+            ctx.stroke();
+
+            // Espinas diminutas en tallos de rosa
+            for (const th of f.thorns) {
+              if (stemEase >= th.t) {
+                const tFrac = Math.min(1, (stemEase - th.t) / 0.14);
+                const pt = quadBezierPoint(p0, p1, p2, th.t);
+                const tang = quadBezierTangent(p0, p1, p2, th.t);
+                ctx.save();
+                ctx.translate(pt.x, pt.y);
+                ctx.rotate(tang + th.side * 1.15);
+                ctx.fillStyle = '#34d399';
+                ctx.beginPath();
+                ctx.moveTo(0, 0);
+                ctx.lineTo(3.2 * tFrac * f.scale, -1.2 * f.scale);
+                ctx.lineTo(0, -2.4 * tFrac * f.scale);
+                ctx.closePath();
+                ctx.fill();
+                ctx.restore();
+              }
+            }
+
+            // Hojas a lo largo del tallo
+            for (const lf of f.leaves) {
+              if (stemEase >= lf.t) {
+                const leafGrow = easeOutBack(Math.min(1, (stemEase - lf.t) / 0.25));
+                const pt = quadBezierPoint(p0, p1, p2, lf.t);
+                const tang = quadBezierTangent(p0, p1, p2, lf.t);
+                const breeze = Math.sin(time * 2.1 + f.swayPhase + lf.t * 4) * 0.08;
+
+                ctx.save();
+                ctx.translate(pt.x, pt.y);
+                ctx.rotate(tang + lf.side * 0.78 + lf.angleOffset + breeze);
+                ctx.scale(leafGrow * lf.size, leafGrow * lf.size);
+
+                const leafGrad = ctx.createLinearGradient(0, 0, 14, -5);
+                leafGrad.addColorStop(0, '#059669');
+                leafGrad.addColorStop(0.7, '#10b981');
+                leafGrad.addColorStop(1, '#6ee7b7');
+
+                ctx.fillStyle = leafGrad;
+                ctx.beginPath();
+                ctx.moveTo(0, 0);
+                ctx.quadraticCurveTo(7, -5.5, 15, -1.2);
+                ctx.quadraticCurveTo(8, 3.8, 0, 0);
+                ctx.fill();
+
+                ctx.strokeStyle = 'rgba(167, 243, 208, 0.55)';
+                ctx.lineWidth = 0.7;
+                ctx.beginPath();
+                ctx.moveTo(1, -0.3);
+                ctx.lineTo(12.5, -1.0);
+                ctx.stroke();
+
+                ctx.restore();
+              }
+            }
+          }
+
+          // 3. Floración en la punta del tallo (flores más grandes sobre un tallo corto)
+          if (f.stemProgress > 0.72) {
+            const tipApproach = Math.min(1, (f.stemProgress - 0.72) / 0.28);
+            const bloomEase = easeOutBack(f.bloomProgress);
+            // Escala floral ampliada para destacar con respecto al tallo pequeño
+            const headScale = f.scale * 1.35 * (0.24 + tipApproach * 0.26 + bloomEase * 0.50);
+            const tipAngle = quadBezierTangent(p0, p1, p2, 1) + Math.PI * 0.5 + sway * 0.015;
+
+            drawFlowerSpecies(f, p2.x, p2.y, tipAngle, headScale, f.bloomProgress, time);
+          }
+
+          ctx.restore();
+        } catch (err) {
+          ctx.restore();
+        }
+      }
+
+      function drawFlowerSpecies(f, x, y, angle, scale, bloom, time) {
+        ctx.save();
+        ctx.translate(x, y);
+        ctx.rotate(angle);
+        ctx.scale(scale, scale);
+
+        const open = Math.max(0, Math.min(1, bloom));
+
+        switch (f.type) {
+          case 'rose':
+            drawRoseHead(open, f.roseVariant, time, f.swayPhase);
+            break;
+          case 'white_tulip':
+            drawTulipHead(open, 'white');
+            break;
+          case 'orange_tulip':
+            drawTulipHead(open, 'orange');
+            break;
+          case 'lavender':
+            drawLavenderSpike(open, f.subBlooms, time, f.swayPhase);
+            break;
+          case 'bellflower':
+            drawBellflowerCluster(open, f.subBlooms, time, f.swayPhase);
+            break;
+          case 'daisy':
+            drawDaisyHead(open, time, f.swayPhase);
+            break;
+          case 'gypsophila':
+            drawGypsophilaSprig(open, f.subBlooms);
+            break;
+        }
+
+        ctx.restore();
+      }
+
+      // Rosa roja aterciopelada con pétalos en espiral
+      function drawRoseHead(open, variant, time, phase) {
+        const isCrimson = variant === 'crimson';
+        const outerDark = isCrimson ? '#7f1d1d' : '#881337';
+        const outerMid = isCrimson ? '#dc2626' : '#e11d48';
+        const innerLight = isCrimson ? '#fda4af' : '#fecdd3';
+
+        const halo = ctx.createRadialGradient(0, -10, 2, 0, -10, 22);
+        halo.addColorStop(0, isCrimson ? 'rgba(244, 63, 94, 0.26)' : 'rgba(251, 113, 133, 0.24)');
+        halo.addColorStop(1, 'rgba(225, 29, 72, 0)');
+        ctx.fillStyle = halo;
+        ctx.beginPath();
+        ctx.arc(0, -10, 22, 0, Math.PI * 2);
+        ctx.fill();
+
+        const petalCount = 5;
+        const spread = 0.25 + open * 0.65;
+        for (let i = 0; i < petalCount; i++) {
+          const a = ((i / (petalCount - 1)) - 0.5) * spread * 1.65;
+          ctx.save();
+          ctx.translate(0, -8);
+          ctx.rotate(a);
+
+          const pGrad = ctx.createLinearGradient(0, 0, 0, -16);
+          pGrad.addColorStop(0, outerDark);
+          pGrad.addColorStop(0.55, outerMid);
+          pGrad.addColorStop(1, innerLight);
+
+          ctx.fillStyle = pGrad;
+          ctx.beginPath();
+          ctx.moveTo(0, 2);
+          ctx.bezierCurveTo(-11, -2, -12, -14, -4, -17);
+          ctx.quadraticCurveTo(0, -14.5, 4, -17);
+          ctx.bezierCurveTo(12, -14, 11, -2, 0, 2);
+          ctx.fill();
+          ctx.restore();
+        }
+
+        const innerScale = 0.45 + open * 0.55;
+        ctx.save();
+        ctx.translate(0, -10);
+        ctx.scale(innerScale, innerScale);
+        ctx.fillStyle = outerMid;
+        ctx.beginPath();
+        ctx.arc(0, 0, 7.5, 0, Math.PI * 2);
+        ctx.fill();
+
+        ctx.strokeStyle = innerLight;
+        ctx.lineWidth = 1.4;
+        ctx.beginPath();
+        ctx.arc(0, 0, 4.2, 0.2, Math.PI * 1.65);
+        ctx.stroke();
+        ctx.restore();
+
+        const sparkle = 0.4 + 0.6 * Math.sin(time * 2.5 + phase);
+        ctx.fillStyle = `rgba(255, 228, 230, ${0.45 * sparkle})`;
+        ctx.beginPath();
+        ctx.arc(-3, -12, 1.3, 0, Math.PI * 2);
+        ctx.fill();
+      }
+
+      // Tulipán blanco o naranja en copa elegante
+      function drawTulipHead(open, colorMode) {
+        const isWhite = colorMode === 'white';
+
+        const glow = ctx.createRadialGradient(0, -12, 2, 0, -12, 22);
+        if (isWhite) {
+          glow.addColorStop(0, 'rgba(240, 249, 255, 0.26)');
+          glow.addColorStop(1, 'rgba(224, 242, 254, 0)');
+        } else {
+          glow.addColorStop(0, 'rgba(251, 146, 60, 0.28)');
+          glow.addColorStop(1, 'rgba(249, 115, 22, 0)');
+        }
+        ctx.fillStyle = glow;
+        ctx.beginPath();
+        ctx.arc(0, -12, 22, 0, Math.PI * 2);
+        ctx.fill();
+
+        const backGrad = ctx.createLinearGradient(0, 0, 0, -22);
+        if (isWhite) {
+          backGrad.addColorStop(0, '#cbd5e1');
+          backGrad.addColorStop(1, '#f8fafc');
+        } else {
+          backGrad.addColorStop(0, '#c2410c');
+          backGrad.addColorStop(1, '#fb923c');
+        }
+
+        ctx.fillStyle = backGrad;
+        ctx.beginPath();
+        ctx.moveTo(0, 0);
+        ctx.quadraticCurveTo(-11, -8, -7, -21);
+        ctx.quadraticCurveTo(0, -16, 7, -21);
+        ctx.quadraticCurveTo(11, -8, 0, 0);
+        ctx.fill();
+
+        const flare = open * 0.22;
+        const leftGrad = ctx.createLinearGradient(-10, 0, -4, -22);
+        if (isWhite) {
+          leftGrad.addColorStop(0, '#e2e8f0');
+          leftGrad.addColorStop(0.6, '#ffffff');
+          leftGrad.addColorStop(1, '#f1f5f9');
+        } else {
+          leftGrad.addColorStop(0, '#ea580c');
+          leftGrad.addColorStop(0.55, '#f97316');
+          leftGrad.addColorStop(1, '#fdba74');
+        }
+
+        ctx.save();
+        ctx.rotate(-flare);
+        ctx.fillStyle = leftGrad;
+        ctx.beginPath();
+        ctx.moveTo(0, 0);
+        ctx.bezierCurveTo(-13, -4, -14, -17, -4, -22);
+        ctx.bezierCurveTo(0, -15, 1, -7, 0, 0);
+        ctx.fill();
+        ctx.restore();
+
+        const rightGrad = ctx.createLinearGradient(4, 0, 10, -22);
+        if (isWhite) {
+          rightGrad.addColorStop(0, '#e2e8f0');
+          rightGrad.addColorStop(0.6, '#ffffff');
+          rightGrad.addColorStop(1, '#f1f5f9');
+        } else {
+          rightGrad.addColorStop(0, '#ea580c');
+          rightGrad.addColorStop(0.55, '#fb923c');
+          rightGrad.addColorStop(1, '#fed7aa');
+        }
+
+        ctx.save();
+        ctx.rotate(flare);
+        ctx.fillStyle = rightGrad;
+        ctx.beginPath();
+        ctx.moveTo(0, 0);
+        ctx.bezierCurveTo(13, -4, 14, -17, 4, -22);
+        ctx.bezierCurveTo(0, -15, -1, -7, 0, 0);
+        ctx.fill();
+        ctx.restore();
+      }
+
+      // Espiga de lavanda con florecillas violetas
+      function drawLavenderSpike(open, tiers, time, phase) {
+        const glow = ctx.createRadialGradient(0, -14, 2, 0, -14, 22);
+        glow.addColorStop(0, 'rgba(192, 132, 252, 0.25)');
+        glow.addColorStop(1, 'rgba(168, 85, 247, 0)');
+        ctx.fillStyle = glow;
+        ctx.beginPath();
+        ctx.arc(0, -14, 22, 0, Math.PI * 2);
+        ctx.fill();
+
+        const spikeHeight = 26 * (0.45 + open * 0.55);
+        ctx.strokeStyle = '#6ee7b7';
+        ctx.lineWidth = 1.6;
+        ctx.beginPath();
+        ctx.moveTo(0, 0);
+        ctx.lineTo(0, -spikeHeight);
+        ctx.stroke();
+
+        const visibleTiers = Math.max(1, Math.ceil(tiers.length * (0.3 + open * 0.7)));
+        for (let i = 0; i < visibleTiers; i++) {
+          const tInfo = tiers[i];
+          const py = -4 - tInfo.frac * (spikeHeight - 6);
+          const swayBud = Math.sin(time * 2.4 + phase + i * 0.6) * 0.7;
+
+          for (const side of [-1, 1]) {
+            ctx.save();
+            ctx.translate(side * (tInfo.spread * 0.55 + swayBud), py);
+            ctx.rotate(side * 0.45);
+
+            const lGrad = ctx.createRadialGradient(0, 0, 0.5, 0, 0, tInfo.size);
+            lGrad.addColorStop(0, '#e9d5ff');
+            lGrad.addColorStop(0.55, '#a855f7');
+            lGrad.addColorStop(1, '#6b21a8');
+
+            ctx.fillStyle = lGrad;
+            ctx.beginPath();
+            ctx.ellipse(0, 0, tInfo.size * 0.75, tInfo.size * 1.15, 0, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.restore();
+          }
+        }
+      }
+
+      // Campanillas colgantes en tonos violeta y azul lavanda
+      function drawBellflowerCluster(open, bells, time, phase) {
+        const glow = ctx.createRadialGradient(0, -12, 2, 0, -12, 22);
+        glow.addColorStop(0, 'rgba(165, 180, 252, 0.24)');
+        glow.addColorStop(1, 'rgba(129, 140, 248, 0)');
+        ctx.fillStyle = glow;
+        ctx.beginPath();
+        ctx.arc(0, -12, 22, 0, Math.PI * 2);
+        ctx.fill();
+
+        for (let i = 0; i < bells.length; i++) {
+          const b = bells[i];
+          const bellOpen = Math.max(0, Math.min(1, open * 1.2 - i * 0.15));
+          if (bellOpen <= 0.02) continue;
+
+          const swing = Math.sin(time * 2.2 + phase + i * 1.2) * 0.14;
+          const bx = b.side * (5 + i * 3.5);
+          const by = -6 - i * 5.5;
+
+          ctx.save();
+          ctx.translate(bx, by);
+          ctx.rotate(b.side * 0.55 + swing);
+          ctx.scale(b.scale * (0.4 + bellOpen * 0.6), b.scale * (0.4 + bellOpen * 0.6));
+
+          ctx.strokeStyle = '#34d399';
+          ctx.lineWidth = 1.4;
+          ctx.beginPath();
+          ctx.moveTo(0, 0);
+          ctx.lineTo(0, 6);
+          ctx.stroke();
+
+          const bellGrad = ctx.createLinearGradient(0, 5, 0, 18);
+          bellGrad.addColorStop(0, `hsla(${b.hue}, 82%, 74%, 0.96)`);
+          bellGrad.addColorStop(1, `hsla(${b.hue + 14}, 76%, 52%, 0.92)`);
+
+          ctx.fillStyle = bellGrad;
+          ctx.beginPath();
+          ctx.moveTo(0, 5);
+          ctx.bezierCurveTo(-5, 7, -7, 13, -9, 17);
+          ctx.quadraticCurveTo(-4.5, 15, -3, 17);
+          ctx.quadraticCurveTo(0, 15, 3, 17);
+          ctx.quadraticCurveTo(4.5, 15, 9, 17);
+          ctx.bezierCurveTo(7, 13, 5, 7, 0, 5);
+          ctx.fill();
+
+          ctx.strokeStyle = '#fef08a';
+          ctx.lineWidth = 1.1;
+          ctx.beginPath();
+          ctx.moveTo(0, 11);
+          ctx.lineTo(0, 17.5);
+          ctx.stroke();
+
+          ctx.fillStyle = '#fde047';
+          ctx.beginPath();
+          ctx.arc(0, 18, 1.4, 0, Math.PI * 2);
+          ctx.fill();
+
+          ctx.restore();
+        }
+      }
+
+      // Margarita silvestre luminosa de pétalos blancos y centro dorado
+      function drawDaisyHead(open, time, phase) {
+        const glow = ctx.createRadialGradient(0, -8, 1, 0, -8, 18);
+        glow.addColorStop(0, 'rgba(254, 240, 138, 0.24)');
+        glow.addColorStop(1, 'rgba(250, 204, 21, 0)');
+        ctx.fillStyle = glow;
+        ctx.beginPath();
+        ctx.arc(0, -8, 18, 0, Math.PI * 2);
+        ctx.fill();
+
+        const petals = 10;
+        const rotDrift = Math.sin(time * 0.8 + phase) * 0.05;
+        ctx.save();
+        ctx.translate(0, -8);
+        ctx.rotate(rotDrift);
+
+        for (let i = 0; i < petals; i++) {
+          const a = (i / petals) * Math.PI * 2;
+          ctx.save();
+          ctx.rotate(a);
+
+          const pLen = (4 + open * 7.5);
+          const pGrad = ctx.createLinearGradient(0, 0, 0, -pLen);
+          pGrad.addColorStop(0, '#e2e8f0');
+          pGrad.addColorStop(1, '#ffffff');
+
+          ctx.fillStyle = pGrad;
+          ctx.beginPath();
+          ctx.ellipse(0, -pLen * 0.55 - 2, 2.3, pLen * 0.55, 0, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.restore();
+        }
+
+        const cGrad = ctx.createRadialGradient(0, 0, 0.5, 0, 0, 4.2);
+        cGrad.addColorStop(0, '#fef08a');
+        cGrad.addColorStop(1, '#f59e0b');
+        ctx.fillStyle = cGrad;
+        ctx.beginPath();
+        ctx.arc(0, 0, 3.6 * (0.4 + open * 0.6), 0, Math.PI * 2);
+        ctx.fill();
+
+        ctx.restore();
+      }
+
+      // Velo de novia (gypsophila): ramillete de florecillas blancas diminutas
+      function drawGypsophilaSprig(open, subBlooms) {
+        const glow = ctx.createRadialGradient(0, -9, 2, 0, -9, 20);
+        glow.addColorStop(0, 'rgba(255, 255, 255, 0.22)');
+        glow.addColorStop(1, 'rgba(255, 255, 255, 0)');
+        ctx.fillStyle = glow;
+        ctx.beginPath();
+        ctx.arc(0, -9, 20, 0, Math.PI * 2);
+        ctx.fill();
+
+        ctx.strokeStyle = 'rgba(110, 231, 183, 0.72)';
+        ctx.lineWidth = 1.1;
+        for (const sb of subBlooms) {
+          const pOpen = Math.max(0, Math.min(1, (open - sb.delay) / 0.65));
+          if (pOpen <= 0.02) continue;
+
+          const bx = sb.dx * pOpen;
+          const by = sb.dy * pOpen;
+
+          ctx.beginPath();
+          ctx.moveTo(0, 0);
+          ctx.quadraticCurveTo(bx * 0.5, by * 0.75, bx, by);
+          ctx.stroke();
+
+          ctx.fillStyle = `rgba(255, 255, 255, ${0.92 * pOpen})`;
+          ctx.beginPath();
+          ctx.arc(bx, by, sb.r * pOpen, 0, Math.PI * 2);
+          ctx.fill();
+        }
+      }
+
+      window.addEventListener('resize', resize);
+      resize();
+      requestAnimationFrame(animate);
+    };
+  </script>
+</body>
+</html>
